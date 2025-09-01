@@ -125,5 +125,18 @@ if __name__ == "__main__":
         label: records for label, records in separated_beats.items()
         if len(records) >= min_samples
     }
+    
+    if 'V' in final_count_beats:
+
+        beat = final_count_beats['V'][1]
+
+        plt.figure(figsize=(12,6))
+        plt.plot(beat)
+        plt.title('Example of a Normal Heartbeat (V)')
+        plt.xlabel('Samples')
+        plt.ylabel('Amplitude')
+        plt.grid(True)
+        plt.show()
+
 
 
