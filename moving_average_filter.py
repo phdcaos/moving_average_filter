@@ -5,6 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.utils import shuffle
+from imblearn.combine import SMOTEENN
+from sklearn.preprocessing import LabelEncoder
+
+
 
 '''first we will define wich daata we want to load
 luckily MIT-BIH already provides a file with all record names
@@ -172,19 +176,50 @@ if __name__ == "__main__":
         #Adds the filtered records to the final dcitionary
         filtered_beats[label] = filtered_records
      
-    if 'N' in final_count_beats:
+     #Now we will aplly the Smoteen algorithm to balance the dataset
+    
+    #prepare data for the Smoteen algorithm
+    x_records = []
+    Y_labels = []
 
-        original_beat = final_count_beats['N'][0]
-        averaged_beat = filtered_beats['N'][0]
-        plt.figure(figsize=(12,6))
-        plt.plot(original_beat, label='Original Beat')
-        plt.plot(averaged_beat, label='averaged Beat')
-        plt.title('Example of a Normal Heartbeat (V)')
-        plt.xlabel('Samples')
-        plt.ylabel('Amplitude')
-        plt.grid(True)
-        plt.show()
+    for label, records in filtered_beats.items():
+        x_records.extend(records)
+        Y_labels.extend([label] * len(records))
 
+    x_records = np.array(x_records)
+    Y_labels = np.array(Y_labels)
+
+    #map the string labels to integers
+    all_labels = list(filtered_beats.keys())
+    label_encoder = LabelEncoder()
+    label_encoder.fit(all_labels)
+
+    y_encoded = label_encoder.transform(Y_labels)
+
+    #Verify the mapping
+    for original_label, encoded_label in zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)):
+        print(f'Original label: {original_label} -> Encoded label: {encoded_label}')
+
+    #Aplly the Smoteen algorithm
+    sampling_strategy = {
+                        label_encoder.transform([label])[0]: 5000 
+                        for label in all_labels}
+    smoteenn = SMOTEENN(sampling_strategy=sampling_strategy, random_state=42)
+    
+    
+    #Adjusting the data to 2D
+    if x_records.ndim == 1:
+        x_records = np.expand_dims(x_records, axis=-1)
+    
+    x_resampled, Y_resampled = smoteenn.fit_resample(x_records, y_encoded)
+
+    
+    x_final, y_final = shuffle(x_resampled, Y_resampled, random_state=42)
+
+    print(Counter(y_final))
+    
+print(f"Formato do conjunto de dados final (x_final): {x_final.shape}")
+print(f"Formato dos rótulos finais (y_final): {y_final.shape}")
 
 
 
