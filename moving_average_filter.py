@@ -1,9 +1,10 @@
 import wfdb
+import random
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-
+import matplotlib.pyplot as plt
 from collections import Counter
+from sklearn.utils import shuffle
 
 '''first we will define wich daata we want to load
 luckily MIT-BIH already provides a file with all record names
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     separated_beats ={}
 
     #defyning the window size for each heartbeat
-    window = 200
+    window = 260
     half_window = window / 2
 
     #Loop for processing each record
@@ -106,7 +107,7 @@ if __name__ == "__main__":
 
             #gets the endpoint and startpoint of the heartbeat window
             start = int(r_peak - half_window)
-            end = int(r_peak + half_window+ 80)
+            end = int(r_peak + half_window)
 
             #checks if the window is within the signal bounds
             if 0 <= start < end <= len(signals):
@@ -125,7 +126,7 @@ if __name__ == "__main__":
         label: records for label, records in separated_beats.items()
         if len(records) >= min_samples
     }
-    
+    '''
     if 'V' in final_count_beats:
 
         beat = final_count_beats['V'][1]
@@ -137,6 +138,56 @@ if __name__ == "__main__":
         plt.ylabel('Amplitude')
         plt.grid(True)
         plt.show()
+    '''
+    #now we will generate 150 random indexes for each label to choose wich ones with be filtered
+    number_of_samples = 150
+    
+    random_beats ={
+        label: random.sample(records, number_of_samples)
+        for label, records in final_count_beats.items() 
+
+    }
+
+    #now we will aplly a moving average filter
+    filtered_beats = {}
+    filter_average_window = 3
+
+
+    for label, records in random_beats.items():
+        
+        #temporary list for filtered records of this class
+        filtered_records = []
+
+        #Iterates each class record
+        for record in records:
+            #Converts the record to a pandas series
+            record_series = pd.Series(record)
+
+            #Applies the moving average filter the min_periods guarantees that the filter will aply even to the first values
+            filtered_beat = record_series.rolling(window = filter_average_window, min_periods = 1).mean()
+
+            #Adds the the filtered beat to the temporary list converting it back to numpy array
+            filtered_records.append(filtered_beat.values)
+        
+        #Adds the filtered records to the final dcitionary
+        filtered_beats[label] = filtered_records
+     
+    if 'N' in final_count_beats:
+
+        original_beat = final_count_beats['N'][0]
+        averaged_beat = filtered_beats['N'][0]
+        plt.figure(figsize=(12,6))
+        plt.plot(original_beat, label='Original Beat')
+        plt.plot(averaged_beat, label='averaged Beat')
+        plt.title('Example of a Normal Heartbeat (V)')
+        plt.xlabel('Samples')
+        plt.ylabel('Amplitude')
+        plt.grid(True)
+        plt.show()
+
+
+
+
 
 
 
