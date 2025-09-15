@@ -141,7 +141,7 @@ if __name__ == "__main__":
     #now we will apply the SMOTE 
     #first we define the sampling strategy
     sampling_strategy ={
-        label_encoder.transform([label])[0]:5000
+        label_encoder.tranform([label])[0]:5000
         for label in all_labels
     }
     #now we create the smote object
@@ -219,8 +219,40 @@ if __name__ == "__main__":
     for label in smote_beats:
         smote_beats[label] = np.array(smote_beats[label])
 
-    
 
+    #now we will aplly a moving average filter
+    filtered_beats = {}
+    filter_average_window = 5
+
+
+    for label, records in smote_beats.items():
+        
+        #temporary list for filtered records of this class
+        filtered_records = []
+
+        #Iterates each class record
+        for record in records:
+            #Converts the record to a pandas series
+            record_series = pd.Series(record)
+
+            #Applies the moving average filter the min_periods guarantees that the filter will aply even to the first values
+            filtered_beat = record_series.rolling(window = filter_average_window).mean()
+
+            #Adds the the filtered beat to the temporary list converting it back to numpy array
+            filtered_records.append(filtered_beat.values)
+        
+        #Adds the filtered records to the final dcitionary
+        filtered_beats[label] = filtered_records
+     
+     #Now we will aplly the Smoteen algorithm to balance the dataset
 
    
-  
+    for key in filtered_beats:
+        beats = [key]
+        plt.figure(figsize=(12,6))
+        plt.plot(beats)
+        plt.title(f'Unfiltered beats of {key} label: ' )
+        plt.xlabel('Samples')
+        plt.ylabel('Amplitude')
+        plt.grid(True)
+        plt.show()
