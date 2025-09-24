@@ -14,9 +14,9 @@ def load_records_names(record_file_path):
 
 #creating the dataframes:
 def create_record_df(signal_name, file_path ='./database'):
-    signal, field = wfdb.rdsamp(f'{file_path}/{signal_name}')
+    signal, channels = wfdb.rdsamp(f'{file_path}/{signal_name}')
 
-    signal_frame = pd.DataFrame(signal, columns = field['sig_name'])
+    signal_frame = pd.DataFrame(signal, columns = channels['sig_name'])
     return signal_frame
 
 def create_annotation_df(signal_name, file_path ='/database'):
@@ -35,7 +35,7 @@ def create_annotation_df(signal_name, file_path ='/database'):
 #saving the dataframes to csv
 def save_record(dataframe, signal_name, saving_path = './signal_tables'):
 
-    place_and_name = f'{saving_path}/record_{signal_name}.csv'
+    place_and_name = f'{saving_path}/{signal_name}_record.csv'
     if os.path.exists(place_and_name):
         print('File already exists')
         return
@@ -45,7 +45,7 @@ def save_record(dataframe, signal_name, saving_path = './signal_tables'):
 
 def save_ann(dataframe, signal_name, saving_path = './signal_tables'):
 
-    place_and_name = f'{saving_path}/annotation_{signal_name}.csv'
+    place_and_name = f'{saving_path}/{signal_name}_annotation.csv'
     if os.path.exists(place_and_name):
         print('File already exists')
         return
