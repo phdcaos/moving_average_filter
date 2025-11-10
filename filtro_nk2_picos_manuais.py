@@ -19,6 +19,18 @@ except (FileNotFoundError, KeyError) as e:
 
 # --- Limpeza de Baseline com NeuroKit2 (usando o fs correto) ---
 ecg_cleaned = nk.ecg_clean(ecg_signal, sampling_rate=fs, method="neurokit")
+ecg_1 =  nk.ecg_clean(ecg_signal, sampling_rate=360, method="biosppy"),
+#ecg_2 = nk.ecg_clean(ecg_signal, sampling_rate=360, method="pantompkins1985"),
+#ecg_3 = nk.ecg_clean(ecg_signal, sampling_rate=360, method="hamilton2002"),
+#ecg_4 = nk.ecg_clean(ecg_signal, sampling_rate=360, method="elgendi2010"),
+#ecg_5 = nk.ecg_clean(ecg_signal, sampling_rate=360, method="engzeemod2012"),
+#ecg_7 =  nk.ecg_clean(ecg_signal, sampling_rate=360, method="kalidas2017"),
+
+plt.figure(figsize=(20, 8))
+
+# Plotar o sinal onde a detecção foi feita
+plt.plot(ecg_1, label=f'Diferentes Filtros', color='black', alpha=0.8)
+
 
 # --- Aplicação do Filtro de Média Móvel para Suavização ---
 window_size = 20  # Janela de 11 amostras
@@ -27,6 +39,8 @@ ecg_smoothed = s_cleaned.rolling(window=window_size, center=True).mean()
 ecg_smoothed.fillna(method='bfill', inplace=True) # Preenche NaNs no início
 ecg_smoothed.fillna(method='ffill', inplace=True) # Preenche NaNs no fim
 ecg_smoothed = ecg_smoothed.values # Converte de volta para array numpy
+
+
 
 
 # =============================================================================
